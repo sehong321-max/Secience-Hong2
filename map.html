@@ -149,7 +149,7 @@ textarea:focus,input:focus{outline:2px solid var(--blue);border-color:var(--blue
 "use strict";
 const $=id=>document.getElementById(id);
 const svg=$('svg'); const NS='http://www.w3.org/2000/svg';
-const W=1200,H=760,MAPH=600, CW=118,CH=48, BAND=78;
+const W=1200,H=760,MAPH=600, CW=118,CH=48, BAND=126;
 const CARD_LABELS=['속력','등속 운동','자유 낙하','9.8','일','위치 E','운동 E','역학적 E','보존','마찰','열','발전','전기 E','소비 전력 (W)','전력량 (Wh)','J'];
 const RELS=['비례','제곱 비례','반비례','합','차','같다','전환','증가','감소','일정','기울기','조건','깨뜨림','단위','1 W = 1 J/s','직접 입력'];
 const TAGC={1:'#3B8FEF',3:'#FF9147'};
@@ -223,9 +223,17 @@ function render(){
     const gb=el('g',{});
     if(!bandShown){ gb.setAttribute('opacity','0'); }
     gb.appendChild(el('rect',{x:0,y:bandY,width:W,height:BAND,fill:'#16324F'}));
-    gb.appendChild(el('text',{x:22,y:bandY+22,'font-size':11,fill:'#A7C3D9','font-weight':700,'letter-spacing':'.14em'},'본부가 확인하려던 것 — 이 단원의 탐구 진술문'));
-    gb.appendChild(el('text',{x:22,y:bandY+48,'font-size':17.5,fill:'#fff','font-weight':800},'물체의 운동과 에너지 사이의 정량적인 관계는 일정한 법칙을 따르며, 이를 수치화하여'));
-    gb.appendChild(el('text',{x:22,y:bandY+68,'font-size':17.5,fill:'#fff','font-weight':800},'증명하는 것은 자연계의 보편적 원리를 규명한다.'));
+    gb.appendChild(el('text',{x:22,y:bandY+20,'font-size':11,fill:'#A7C3D9','font-weight':700,'letter-spacing':'.14em'},'본부가 확인하려던 것 — 이 단원의 탐구 진술문'));
+    gb.appendChild(el('text',{x:22,y:bandY+44,'font-size':17,fill:'#fff','font-weight':800},'물체의 운동과 에너지 사이의 정량적인 관계는 일정한 법칙을 따르며, 이를 수치화하여'));
+    gb.appendChild(el('text',{x:22,y:bandY+64,'font-size':17,fill:'#fff','font-weight':800},'증명하는 것은 자연계의 보편적 원리를 규명한다.'));
+    gb.appendChild(el('line',{x1:22,y1:bandY+78,x2:W-22,y2:bandY+78,stroke:'#3A5878','stroke-dasharray':'4 4'}));
+    gb.appendChild(el('text',{x:22,y:bandY+95,'font-size':10.5,fill:'#7FC4F0','font-weight':700,'letter-spacing':'.12em'},'우리 모둠의 확인'));
+    const rl = wrapTxt(S.reason.trim(), 74);
+    if(rl.length){
+      rl.forEach((ln,i)=>gb.appendChild(el('text',{x:118,y:bandY+95+i*19,'font-size':14.5,fill:'#DCE8F4','font-weight':600},ln)));
+    } else {
+      gb.appendChild(el('text',{x:118,y:bandY+95,'font-size':14,fill:'#6E8AA3','font-style':'italic'},'오른쪽 칸에 한 문장을 쓰면 여기에 나타난다.'));
+    }
     svg.appendChild(gb);
     if(!bandShown){
       bandShown=true;
@@ -341,7 +349,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'){pop.classList.remo
 document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>{ mode=(mode===+b.dataset.m)?0:+b.dataset.m; sel=null; render();
   const msg={1:'선을 클릭해 ① 정량적 관계(파랑)로 표시',2:'카드를 클릭해 ② 일정한 법칙(초록)으로 표시',3:'카드를 클릭해 ③ 수치화·보편 원리(주황)로 표시'}[mode];
   if(msg) hint(msg); }));
-$('reason').addEventListener('input',e=>{S.reason=e.target.value; panels(); save();});
+$('reason').addEventListener('input',e=>{S.reason=e.target.value; render();});
 $('gname').addEventListener('input',e=>{S.gname=e.target.value; panels(); save();});
 $('undo').addEventListener('click',undo);
 $('reset').addEventListener('click',()=>ask('지도를 전부 지우고 처음부터 다시 할까요?',()=>{S=fresh();hist=[];sel=null;mode=0;render();$('reason').value='';$('gname').value='';}));
@@ -349,9 +357,9 @@ if(!S.stars)S.stars=[];
 
 /* ── 교사용 모범 답안 ── */
 var MODEL={
- pos:{'속력':[20,20],'자유 낙하':[230,20],'9.8':[440,20],'위치 E':[650,20],'일':[860,20],
-   '등속 운동':[20,125],'운동 E':[230,125],'역학적 E':[650,125],'보존':[860,125],'마찰':[1060,125],
-   'J':[430,270],'열':[1060,235],'전기 E':[700,370],'발전':[900,370],'소비 전력 (W)':[700,466],'전력량 (Wh)':[900,466]},
+ pos:{'속력':[20,14],'자유 낙하':[230,14],'9.8':[440,14],'위치 E':[650,14],'일':[860,14],
+   '등속 운동':[20,108],'운동 E':[230,108],'역학적 E':[650,108],'보존':[860,108],'마찰':[1060,108],
+   'J':[430,232],'열':[1060,202],'전기 E':[700,314],'발전':[900,314],'소비 전력 (W)':[700,404],'전력량 (Wh)':[900,404]},
  lines:[['속력','등속 운동','일정'],['속력','자유 낙하','증가'],['자유 낙하','9.8','기울기'],
    ['9.8','위치 E','비례'],['위치 E','일','같다'],['속력','운동 E','제곱 비례'],
    ['운동 E','역학적 E','합'],['위치 E','역학적 E','합'],['위치 E','운동 E','전환'],
@@ -421,19 +429,17 @@ $('tstart').addEventListener('click',()=>{
 $('save').addEventListener('click',()=>{
   const clone=svg.cloneNode(true);
   clone.querySelector('.tray').remove();
-  clone.setAttribute('viewBox',`0 0 ${W} ${MAPH+150}`);
-  clone.setAttribute('width',W); clone.setAttribute('height',MAPH+150);
+  clone.setAttribute('viewBox',`0 0 ${W} ${MAPH+92}`);
+  clone.setAttribute('width',W); clone.setAttribute('height',MAPH+92);
   const f=document.createElementNS(NS,'g');
-  f.appendChild(el('rect',{x:0,y:MAPH,width:W,height:150,fill:'#F2F7FC'}));
+  f.appendChild(el('rect',{x:0,y:MAPH,width:W,height:92,fill:'#F2F7FC'}));
   f.appendChild(el('line',{x1:0,y1:MAPH,x2:W,y2:MAPH,stroke:'#C9D8E8','stroke-width':2}));
-  f.appendChild(el('text',{x:24,y:MAPH+32,'font-size':20,'font-weight':800,fill:'#16324F'},S.gname.trim()));
-  f.appendChild(el('text',{x:24,y:MAPH+60,'font-size':13,fill:'#6B7F94','font-weight':700},'본부의 문장이 우리 지도에 있는 곳'));
-  wrap(S.reason.trim(),64).forEach((ln,i)=>f.appendChild(el('text',{x:24,y:MAPH+84+i*22,'font-size':15,fill:'#243447'},ln)));
+  f.appendChild(el('text',{x:24,y:MAPH+38,'font-size':21,'font-weight':800,fill:'#16324F'},S.gname.trim()));
   [['①','숫자로 정해진 관계 = 파란 선','#3B8FEF'],['②','다 모이는 곳 = 주황 카드','#FF9147']].forEach((r,i)=>{
-    f.appendChild(el('rect',{x:800,y:MAPH+18+i*30,width:14,height:14,rx:4,fill:r[2]}));
-    f.appendChild(el('text',{x:822,y:MAPH+30+i*30,'font-size':13,fill:'#243447','font-weight':600},r[0]+' '+r[1]));
+    f.appendChild(el('rect',{x:760,y:MAPH+22+i*30,width:14,height:14,rx:4,fill:r[2]}));
+    f.appendChild(el('text',{x:782,y:MAPH+34+i*30,'font-size':14,fill:'#243447','font-weight':600},r[0]+' '+r[1]));
   });
-  f.appendChild(el('text',{x:W-24,y:MAPH+138,'font-size':11,fill:'#9FB2C4','text-anchor':'end','letter-spacing':'.12em'},'세홍과학 · 제3구역 초고속 동력 제어실 · 9차시 단원 지도'));
+  f.appendChild(el('text',{x:W-24,y:MAPH+84,'font-size':11,fill:'#9FB2C4','text-anchor':'end','letter-spacing':'.12em'},'세홍과학 · 제3구역 초고속 동력 제어실 · 9차시 단원 지도'));
   clone.appendChild(f);
   const xml=new XMLSerializer().serializeToString(clone);
   const img=new Image();
@@ -446,6 +452,7 @@ $('save').addEventListener('click',()=>{
   img.onerror=()=>hint('저장에 실패했다. 다시 시도해 보자.');
   img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
 });
+function wrapTxt(t,n){const out=[];let x=t;while(x.length>n){let k=x.lastIndexOf(' ',n);if(k<n*0.5)k=n;out.push(x.slice(0,k));x=x.slice(k).trim();}if(x)out.push(x);return out.slice(0,2);}
 function wrap(t,n){const out=[];let s=t;while(s.length>n){let k=s.lastIndexOf(' ',n);if(k<n*0.5)k=n;out.push(s.slice(0,k));s=s.slice(k).trim();}if(s)out.push(s);return out.slice(0,3);}
 
 if(S.soi) delete S.soi;
