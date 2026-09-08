@@ -227,12 +227,13 @@ function render(){
     gb.appendChild(el('text',{x:22,y:bandY+44,'font-size':17,fill:'#fff','font-weight':800},'물체의 운동과 에너지 사이의 정량적인 관계는 일정한 법칙을 따르며, 이를 수치화하여'));
     gb.appendChild(el('text',{x:22,y:bandY+64,'font-size':17,fill:'#fff','font-weight':800},'증명하는 것은 자연계의 보편적 원리를 규명한다.'));
     gb.appendChild(el('line',{x1:22,y1:bandY+78,x2:W-22,y2:bandY+78,stroke:'#3A5878','stroke-dasharray':'4 4'}));
-    gb.appendChild(el('text',{x:22,y:bandY+95,'font-size':10.5,fill:'#7FC4F0','font-weight':700,'letter-spacing':'.12em'},'우리 모둠의 확인'));
-    const rl = wrapTxt(S.reason.trim(), 74);
+    gb.appendChild(el('rect',{x:22,y:bandY+83,width:86,height:20,rx:10,fill:'#FF9147'}));
+    gb.appendChild(el('text',{x:65,y:bandY+97,'font-size':11.5,fill:'#2A1400','font-weight':800,'text-anchor':'middle','letter-spacing':'.06em'},'우리 모둠'));
+    const rl = wrapTxt(S.reason.trim(), 68);
     if(rl.length){
-      rl.forEach((ln,i)=>gb.appendChild(el('text',{x:118,y:bandY+95+i*19,'font-size':14.5,fill:'#DCE8F4','font-weight':600},ln)));
+      rl.forEach((ln,i)=>gb.appendChild(el('text',{x:120,y:bandY+98+i*21,'font-size':16,fill:'#FFD98A','font-weight':800},ln)));
     } else {
-      gb.appendChild(el('text',{x:118,y:bandY+95,'font-size':14,fill:'#6E8AA3','font-style':'italic'},'오른쪽 칸에 한 문장을 쓰면 여기에 나타난다.'));
+      gb.appendChild(el('text',{x:120,y:bandY+98,'font-size':14.5,fill:'#8AA3BC','font-style':'italic'},'오른쪽 칸에 한 문장을 쓰면 여기에 나타난다.'));
     }
     svg.appendChild(gb);
     if(!bandShown){
