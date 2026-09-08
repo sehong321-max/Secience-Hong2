@@ -95,6 +95,23 @@ body.board{overflow:hidden;}
 .wait .b{width:64px;height:64px;background:var(--stone);animation:bob 1.2s infinite alternate;}
 @keyframes bob{to{transform:translateY(-16px)}}
 .wait .t{font-size:24px;font-weight:800;color:var(--mute);}
+.sprites{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.sp{position:absolute;image-rendering:pixelated;}
+@keyframes drift{from{transform:translateX(-240px)}to{transform:translateX(calc(100vw + 240px))}}
+@keyframes drift2{from{transform:translateX(calc(100vw + 200px)) scaleX(-1)}to{transform:translateX(-200px) scaleX(-1)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes hop{0%,100%{transform:translateY(0)}30%{transform:translateY(-16px)}60%{transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shoot{0%{transform:translate(0,0);opacity:0}10%{opacity:1}100%{transform:translate(-420px,300px);opacity:0}}
+.sp.ship{top:9%;animation:drift 34s linear infinite;animation-delay:-9s;}
+.sp.ufo{top:22%;animation:drift2 46s linear infinite;animation-delay:-14s;}
+.sp.ufo .in{animation:bob 3s ease-in-out infinite;}
+.sp.planet{right:5%;top:14%;opacity:.65;animation:spin 120s linear infinite;}
+.sp.star{right:12%;top:6%;animation:shoot 9s ease-in infinite;}
+.sp.crew{bottom:66px;}
+.sp.crew.a{left:5%;animation:hop 2.6s ease-in-out infinite;}
+.sp.crew.b{left:15%;animation:hop 2.6s ease-in-out infinite .8s;}
+.sp.crew.c{left:44%;animation:hop 3.1s ease-in-out infinite .4s;}
 .b-ctl{position:fixed;right:14px;bottom:76px;z-index:5;display:flex;gap:8px;opacity:.25;transition:opacity .2s;}
 .b-ctl:hover{opacity:1;}
 .b-ctl button{background:#22344F;color:var(--ink);font-size:12.5px;font-weight:700;padding:8px 12px;cursor:pointer;}
@@ -111,7 +128,7 @@ body.board{overflow:hidden;}
 /* ═══════════════════════════════════════════════════════
    ★ 여기에 구글 앱스 스크립트 웹앱 URL을 붙여넣으세요 ★
    ═══════════════════════════════════════════════════════ */
-const SCRIPT_URL = "";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxWHWuYvH2x79RdNJY0VJoLcIxDG5EZtDb01MIBVyoVGoddbxBliyK0CF8uJnyePYj/exec";
 
 const LP=[
  ['사고하는 사람','잃어버린 에너지를 끝까지 따라갔다'],
@@ -186,7 +203,37 @@ function studentView(){
 /* ══════════ 전광판 ══════════ */
 function boardView(){
   document.body.classList.add('board');
+  var px=function(g,c,sc){ /* g: 문자열 배열, c: 색 맵 */
+    var w=g[0].length,h=g.length,o='';
+    for(var y=0;y<h;y++) for(var x=0;x<w;x++){ var k=g[y][x]; if(k===' ') continue;
+      o+='<rect x="'+x+'" y="'+y+'" width="1" height="1" fill="'+c[k]+'"/>'; }
+    return '<svg width="'+w*sc+'" height="'+h*sc+'" viewBox="0 0 '+w+' '+h+'" shape-rendering="crispEdges">'+o+'</svg>';
+  };
+  var SHIP=px([
+   '    RR    ','   RWWR   ','  RWWWWR  ','  RWCCWR  ','  RWCCWR  ',
+   ' RRWWWWRR ','RRRWWWWRRR','RR RWWR RR','   YOOY   ','    OO    ','    Y     '],
+   {R:'#E0433A',W:'#EAF0FF',C:'#4DD2E8',Y:'#FCC419',O:'#FF9147'},4);
+  var UFO=px([
+   '   CCCC   ','  CWWWWC  ',' CW C C WC',' CWWWWWWC ','SSSSSSSSSS','S GG GG  S',' SSSSSSSS ','  Y  Y  Y '],
+   {C:'#4DD2E8',W:'#EAF0FF',S:'#A06BEA',G:'#FCC419',Y:'#9BE8D8'},4);
+  var PLANET=px([
+   '  PPPPPP  ',' PPMMPPPP ','PPMMPPPPPP','PPPPPPMMPP','PPPPPPPPPP','PPMMPPPPPP',' PPPPMMPP ','  PPPPPP  '],
+   {P:'#C08BE0',M:'#8E5FB0'},7);
+  var STAR=px(['  W ',' WWW','WWWWW',' WWW','  W '],{W:'#FFF3CE'},4);
+  function crew(body,helmet){ return px([
+   '  HHHH  ',' HCCCCH ','HCCWWCCH','HCCWWCCH',' HCCCCH ','  BBBB  ',' BBBBBB ','B BBBB B',
+   '  B  B  ','  B  B  ',' WW  WW '],{H:helmet,C:'#22344F',W:'#EAF0FF',B:body},4); }
+  var CREW1=crew('#3B8FEF','#EAF0FF'), CREW2=crew('#25C2A0','#FCC419'), CREW3=crew('#FF9147','#EAF0FF');
   document.getElementById('app').innerHTML=`
+  <div class="sprites">
+    <div class="sp ship">${SHIP}</div>
+    <div class="sp ufo"><div class="in">${UFO}</div></div>
+    <div class="sp planet">${PLANET}</div>
+    <div class="sp star">${STAR}</div>
+    <div class="sp crew a">${CREW1}</div>
+    <div class="sp crew b">${CREW2}</div>
+    <div class="sp crew c">${CREW3}</div>
+  </div>`+`
   <div class="board-wrap">
     <div class="b-top px" style="border-width:0 0 4px 0">
       <div class="tagb px">EXIT TICKET</div><div class="ttl">제3구역 <span>항해 기록</span></div>
@@ -238,15 +285,16 @@ function boardView(){
   $('#pause').onclick=e=>{paused=!paused;e.target.textContent=paused?'다시 시작':'일시정지';};
   /* ── 8비트 BGM (외부 파일 없음 · Web Audio 합성) ── */
   var AC=window.AudioContext||window.webkitAudioContext, actx=null, master=null, seqT=null, step=0, playing=false;
-  var LEAD=[  /* 음이름 → 반음, null=쉼표 */
-    76,null,79,null,81,79,76,null, 74,null,76,null,72,null,69,null,
-    71,null,74,null,76,74,71,null, 69,null,71,null,67,null,64,null,
-    76,null,79,null,84,null,83,81, 79,null,76,null,79,81,79,76,
-    74,76,79,null,81,79,76,74, 72,null,74,null,76,null,null,null];
-  var BASS=[45,null,52,null,45,null,52,null, 43,null,50,null,43,null,50,null,
-            40,null,47,null,40,null,47,null, 41,null,48,null,43,null,50,null,
-            45,null,52,null,45,null,52,null, 43,null,50,null,43,null,50,null,
-            40,null,47,null,41,null,48,null, 43,null,50,null,43,50,43,null];
+  var LEAD=[
+    72,76,79,84, 83,79,76,79, 81,77,74,77, 76,72,null,null,
+    74,77,81,84, 83,81,79,76, 77,74,71,74, 72,null,null,null,
+    84,null,83,81, 79,81,83,84, 86,null,84,83, 81,83,84,86,
+    88,84,81,79, 77,79,81,84, 83,79,76,72, 74,76,72,null];
+  var BASS=[
+    36,48,43,48, 36,48,43,48, 41,53,48,53, 41,53,48,53,
+    38,50,45,50, 38,50,45,50, 43,55,50,55, 43,55,50,55,
+    36,48,43,48, 36,48,43,48, 41,53,48,53, 41,53,48,53,
+    43,55,50,55, 41,53,48,53, 36,48,43,48, 43,50,43,null];
   function hz(n){ return 440*Math.pow(2,(n-69)/12); }
   function blip(note,type,dur,vol,detune){
     if(note===null) return;
@@ -269,16 +317,17 @@ function boardView(){
   }
   function nextStep(){
     var i=step%64;
-    blip(LEAD[i],'square',0.16,0.075,0);
-    blip(BASS[i],'triangle',0.22,0.10,0);
-    if(i%4===2) hat();
+    var swing = (i%2===1);
+    blip(LEAD[i],'square',swing?0.10:0.15,swing?0.055:0.085,0);
+    blip(BASS[i],'triangle',0.18,0.105,0);
+    if(i%4===0||i%4===2) hat();
     step++;
   }
   function bgmOn(){
-    if(!actx){ actx=new AC(); master=actx.createGain(); master.gain.value=0.5; master.connect(actx.destination); }
+    if(!actx){ actx=new AC(); master=actx.createGain(); master.gain.value=0.45; master.connect(actx.destination); }
     if(actx.state==='suspended') actx.resume();
     playing=true; step=0;
-    seqT=setInterval(nextStep,150);   /* 약 100 BPM · 8분음표 */
+    seqT=setInterval(nextStep,128);   /* 약 117 BPM · 8분음표, 경쾌하게 */
     $('#bgm').textContent='🔊 BGM 끄기';
   }
   function bgmOff(){
