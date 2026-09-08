@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제3구역 · 단원 지도 재구성</title>
+<style>
+:root{
+  --navy:#16324F; --deep:#0D1B29; --ink:#243447; --muted:#6B7F94; --line:#D5E1EE; --paper:#F2F7FC;
+  --blue:#3B8FEF; --mint:#25C2A0; --orange:#FF9147; --coral:#FF6B6B; --grape:#A06BEA; --gold:#F5B300;
+  --c1:#3B8FEF; --c2:#25C2A0; --c3:#FF9147;
+  --sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:var(--paper);font-family:var(--sans);color:var(--ink);font-size:15px;line-height:1.5;word-break:keep-all;}
+button{font-family:inherit;cursor:pointer;}
+b{color:var(--navy);font-weight:800;}
+
+.app{display:grid;grid-template-rows:auto 1fr;height:100vh;}
+header{background:var(--navy);color:#fff;padding:10px 20px;display:flex;align-items:center;gap:16px;}
+header .eyebrow{font-size:11px;letter-spacing:.16em;opacity:.7;font-weight:700;}
+header h1{margin:0;font-size:19px;font-weight:800;}
+header .sub{font-size:12.5px;opacity:.8;}
+header .right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.hbtn{background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.25);border-radius:10px;padding:7px 12px;font-size:13.5px;font-weight:700;}
+.hbtn:hover{background:rgba(255,255,255,.22);}
+.hbtn.warn{border-color:var(--coral);color:#FFB3B3;}
+.timer{font-variant-numeric:tabular-nums;font-weight:800;font-size:15px;background:rgba(255,255,255,.1);padding:6px 12px;border-radius:10px;}
+.timer.alert{background:var(--orange);color:var(--deep);animation:blink .8s infinite;}
+@keyframes blink{50%{opacity:.5}}
+
+main{display:grid;grid-template-columns:1fr 300px;gap:14px;padding:14px;min-height:0;}
+.board{background:#fff;border:1.5px solid var(--line);border-radius:16px;overflow:hidden;position:relative;display:flex;flex-direction:column;}
+.board svg{width:100%;height:100%;display:block;user-select:none;touch-action:none;}
+.hint{position:absolute;left:14px;top:12px;background:rgba(22,50,79,.92);color:#fff;font-size:13px;padding:6px 12px;border-radius:9px;pointer-events:none;transition:opacity .2s;}
+.hint.off{opacity:0;}
+
+aside{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto;}
+.panel{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;}
+.panel h3{margin:0 0 8px;font-size:14px;color:var(--navy);display:flex;align-items:center;gap:7px;}
+.panel h3 .n{width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center;}
+.panel.locked{opacity:.45;pointer-events:none;}
+.panel.done h3 .n{background:var(--mint);}
+.chk{font-size:13.5px;color:#34495E;margin:3px 0;display:flex;justify-content:space-between;}
+.chk .ok{color:var(--mint);font-weight:800;} .chk .no{color:var(--muted);}
+.rules{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:6px;}
+.soi{font-size:14px;line-height:1.75;color:var(--ink);}
+.soi span{padding:1px 3px;border-radius:4px;font-weight:700;}
+.soi .s1{background:#DCEBFC;color:#1D5FB0;} .soi .s2{background:#D8F4EC;color:#137A64;} .soi .s3{background:#FFE6D3;color:#B85A10;}
+.modes{display:flex;flex-direction:column;gap:5px;margin-top:8px;}
+.mode{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;font-size:13px;text-align:left;font-weight:700;color:var(--ink);display:flex;justify-content:space-between;align-items:center;}
+.mode small{font-weight:500;color:var(--muted);}
+.mode.on{border-width:2px;} .mode.m1.on{border-color:var(--c1);background:#EAF4FF;} .mode.m2.on{border-color:var(--c2);background:#E6F8F3;}
+.mode.m3.on{border-color:var(--c3);background:#FFF1E6;} .mode.m4.on{border-color:var(--gold);background:#FFF8DE;}
+textarea,input[type=text]{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:8px 10px;font-family:inherit;font-size:13.5px;color:var(--ink);resize:vertical;}
+textarea:focus,input:focus{outline:2px solid var(--blue);border-color:var(--blue);}
+.btn{border:none;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:800;width:100%;margin-top:8px;}
+.btn.pri{background:var(--blue);color:#fff;} .btn.pri:disabled{background:#B9C8D8;cursor:not-allowed;}
+.btn.gold{background:var(--gold);color:var(--deep);}
+.btn.sec{background:#fff;color:var(--navy);border:1.5px solid var(--line);}
+
+/* popover */
+.pop{position:absolute;z-index:50;background:#fff;border:1.5px solid var(--line);border-radius:14px;box-shadow:0 12px 32px rgba(22,50,79,.22);padding:12px;width:300px;display:none;}
+.pop.on{display:block;}
+.pop .t{font-size:12.5px;font-weight:800;color:var(--navy);margin-bottom:6px;}
+.pop .pair{font-size:13.5px;color:var(--ink);margin-bottom:8px;}
+.rels{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+.pop{width:330px;}
+.rel{border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:7px 4px;font-size:13px;font-weight:700;color:var(--ink);}
+.rel:hover{background:var(--paper);border-color:var(--blue);}
+.pop .row{display:flex;gap:6px;margin-top:8px;}
+.pop input{flex:1 1 auto;}
+.pop .sm{border:none;border-radius:9px;padding:7px 10px;font-size:13px;font-weight:800;}
+.pop .sm.pri{background:var(--blue);color:#fff;} .pop .sm.del{background:#FFEEEE;color:var(--coral);} .pop .sm.gho{background:var(--paper);color:var(--muted);}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(22,50,79,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal.on{display:flex;}
+.mbox{background:#fff;border-radius:16px;padding:22px;max-width:420px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(22,50,79,.3);}
+.mbox .mt{font-size:15.5px;font-weight:700;color:var(--navy);line-height:1.6;margin-bottom:14px;}
+.mbox .mb{display:flex;gap:8px;justify-content:center;}
+.mbox .sm{border:none;border-radius:9px;padding:9px 16px;font-size:14px;font-weight:800;}
+.mbox .sm.pri{background:var(--blue);color:#fff;} .mbox .sm.gho{background:var(--paper);color:var(--muted);}
+
+@media (max-width:900px){ main{grid-template-columns:1fr;} aside{max-height:40vh;} }
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div><div class="eyebrow">SECTOR 03 · 초고속 동력 제어실 / LESSON 09</div><h1>단원 지도 재구성</h1><div class="sub">항해 기록이 손상됐다. 남은 카드 16장으로 제어실 지도를 다시 그려라.</div></div>
+  <div class="right">
+    <span class="timer" id="timer" title="조작자 교대 타이머">⏱ 5:00</span>
+    <button class="hbtn" id="tstart">교대 타이머 시작</button>
+    <button class="hbtn" id="undo">↶ 되돌리기</button>
+    <button class="hbtn warn" id="reset">전체 초기화</button>
+  </div>
+</header>
+<main>
+  <div class="board" id="board">
+    <svg id="svg" viewBox="0 0 1200 760" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,BlinkMacSystemFont,Pretendard,'Apple SD Gothic Neo','Malgun Gothic',sans-serif"></svg>
+    <div class="hint" id="hint">카드를 끌어서 지도 위에 놓고, 카드 두 장을 차례로 클릭하면 선이 그어진다.</div>
+    <div class="pop" id="pop"></div>
+  </div>
+  <aside>
+    <div class="panel" id="p1">
+      <h3><span class="n">1</span>지도 만들기</h3>
+      <div class="chk"><span>카드 16장 모두 배치</span><span id="c-cards" class="no">0 / 16</span></div>
+      <div class="chk"><span>관계 선 12개 이상</span><span id="c-lines" class="no">0 / 12</span></div>
+      <div class="chk"><span>J 카드에 붙은 선</span><span id="c-j" class="no">0</span></div>
+      <div class="rules">선에는 반드시 <b>관계 단어</b>가 붙는다. 선 위의 말풍선을 클릭하면 고치거나 지울 수 있다. 조작자는 5분마다 교대.</div>
+    </div>
+    <div class="panel locked" id="p2">
+      <h3><span class="n">2</span>탐구 진술문 대응</h3>
+      <div class="soi"><span class="s1">물체의 운동과 에너지 사이의 정량적인 관계는</span> <span class="s2">일정한 법칙을 따르며,</span> <span class="s3">이를 수치화하여 증명하는 것은 자연계의 보편적 원리를 규명한다.</span></div>
+      <div class="modes">
+        <button class="mode m1" data-m="1">① 정량적 관계 <small>선을 클릭해 파랑</small></button>
+        <button class="mode m2" data-m="2">② 일정한 법칙 <small>카드를 클릭해 초록</small></button>
+        <button class="mode m3" data-m="3">③ 수치화·보편 원리 <small>카드를 클릭해 주황</small></button>
+      </div>
+      <div class="chk" style="margin-top:8px"><span>①선 / ②카드 / ③카드</span><span id="c-tags" class="no">0 / 0 / 0</span></div>
+      <div class="rules" style="margin-top:6px">진술문은 지도 아래 띠에 이미 걸려 있다. 세 토막이 <b>지도의 어디에</b> 있는지 찾아 색으로 표시하자.</div>
+      <div class="rules" style="margin-top:6px;background:#F2F7FC;border-radius:8px;padding:7px 9px;color:#34495E">문장 틀 — 우리 지도에서 <b>○○</b>와(과) <b>○○</b>가 <b>○○</b>로 이어져 있다. 그래서 <b>○○</b>.</div>
+      <textarea id="reason" rows="2" placeholder="우리 지도에서 ○○와 ○○가 ○○로 이어져 있다. 그래서 ○○." style="margin-top:8px"></textarea>
+    </div>
+    <div class="panel locked" id="p3">
+      <h3><span class="n">3</span>저장</h3>
+      <div class="rules" style="margin-top:0">모둠명을 적고 저장하면 지도가 그림 파일로 내려받아진다. 그 그림을 패들렛에 올린다.</div>
+      <input type="text" id="gname" placeholder="모둠명 (예: 3-2 4모둠)" style="margin-top:8px">
+      <button class="btn gold" id="save">이미지로 저장 → 패들렛에 올리기</button>
+    </div>
+  </aside>
+</main>
+</div>
+
+<div class="modal" id="modal"><div class="mbox"><div class="mt" id="mtx"></div><div class="mb"><button class="sm gho" id="mno">취소</button><button class="sm pri" id="myes">확인</button></div></div></div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const svg=$('svg'); const NS='http://www.w3.org/2000/svg';
+const W=1200,H=760,MAPH=600, CW=118,CH=48, BAND=78;
+const CARD_LABELS=['속력','등속 운동','자유 낙하','9.8','일','위치 E','운동 E','역학적 E','보존','마찰','열','발전','전기 E','소비 전력 (W)','전력량 (Wh)','J'];
+const RELS=['비례','제곱 비례','반비례','합','차','같다','전환','증가','감소','일정','기울기','조건','깨뜨림','단위','1 W = 1 J/s','직접 입력'];
+const TAGC={1:'#3B8FEF',2:'#25C2A0',3:'#FF9147'};
+
+
+/* ── state ── */
+let S=load()||fresh();
+let hist=[];
+let sel=null, mode=0, drag=null;
+
+function fresh(){
+  const cards=CARD_LABELS.map((l,i)=>({id:'c'+i,label:l,x:30+(i%8)*146,y:MAPH+22+Math.floor(i/8)*66,tag:0}));
+  return {cards,lines:[],reason:'',gname:''};
+}
+function save(){ try{localStorage.setItem('shmap',JSON.stringify(S));}catch(e){} }
+function load(){ try{const s=localStorage.getItem('shmap'); return s?JSON.parse(s):null;}catch(e){return null;} }
+function push(){ hist.push(JSON.stringify(S)); if(hist.length>60) hist.shift(); }
+function undo(){ if(!hist.length) return; S=JSON.parse(hist.pop()); sel=null; render(); }
+
+const placed=c=>c.y+CH<MAPH-BAND-6;
+const byId=id=>S.cards.find(c=>c.id===id);
+const center=c=>({x:c.x+CW/2,y:c.y+CH/2});
+const degree=id=>S.lines.filter(l=>l.a===id||l.b===id).length;
+
+/* ── render ── */
+function el(n,a,txt){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;return e;}
+function render(){
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  // map area & tray
+  svg.appendChild(el('rect',{x:0,y:0,width:W,height:MAPH,fill:'#FFFFFF'}));
+  const grid=el('g',{stroke:'#EEF3F8','stroke-width':1});
+  for(let x=0;x<W;x+=50) grid.appendChild(el('line',{x1:x,y1:0,x2:x,y2:MAPH}));
+  for(let y=0;y<MAPH;y+=50) grid.appendChild(el('line',{x1:0,y1:y,x2:W,y2:y}));
+  svg.appendChild(grid);
+  const tray=el('g',{class:'tray'});
+  tray.appendChild(el('rect',{x:0,y:MAPH,width:W,height:H-MAPH,fill:'#EEF3F8'}));
+  tray.appendChild(el('line',{x1:0,y1:MAPH,x2:W,y2:MAPH,stroke:'#C9D8E8','stroke-width':2,'stroke-dasharray':'8 6'}));
+  tray.appendChild(el('text',{x:W-16,y:MAPH+18,'font-size':11,fill:'#8DA1B5','text-anchor':'end','font-weight':700,'letter-spacing':'.1em'},'카드 보관함 — 위로 끌어 올려 배치'));
+  svg.appendChild(tray);
+  // lines
+  const gl=el('g'); svg.appendChild(gl);
+  S.lines.forEach((l,i)=>{
+    const A=byId(l.a),B=byId(l.b); if(!A||!B) return;
+    const p=center(A),q=center(B);
+    const col=l.tag===1?TAGC[1]:'#16324F';
+    const g=el('g',{class:'ln','data-i':i});
+    g.appendChild(el('line',{x1:p.x,y1:p.y,x2:q.x,y2:q.y,stroke:col,'stroke-width':l.tag===1?3.5:2.2,'stroke-linecap':'round'}));
+    const mx=(p.x+q.x)/2,my=(p.y+q.y)/2, tw=Math.max(44,[...l.rel].reduce((w,ch)=>w+(/[가-힣]/.test(ch)?13:7.5),0)+22);
+    const lab=el('g',{class:'lab',style:'cursor:pointer'});
+    lab.appendChild(el('rect',{x:mx-tw/2,y:my-12,width:tw,height:24,rx:12,fill:l.tag===1?'#EAF4FF':'#fff',stroke:col,'stroke-width':1.5}));
+    lab.appendChild(el('text',{x:mx,y:my+4.5,'font-size':12.5,'text-anchor':'middle',fill:'#16324F','font-weight':700},l.rel));
+    g.appendChild(lab); gl.appendChild(g);
+  });
+  // cards
+  const gc=el('g'); svg.appendChild(gc);
+  S.cards.forEach(c=>{
+    const isJ=c.label==='J', on=sel===c.id;
+    const g=el('g',{class:'card','data-id':c.id,transform:`translate(${c.x},${c.y})`,style:'cursor:grab'});
+    const stroke=on?'#FF9147':(c.tag?TAGC[c.tag]:(isJ?'#F5B300':'#C9D8E8'));
+    g.appendChild(el('rect',{x:0,y:0,width:CW,height:CH,rx:10,fill:isJ?'#FFF4CC':(c.tag===2?'#E6F8F3':c.tag===3?'#FFF1E6':'#fff'),stroke,'stroke-width':on||c.tag?3:1.8}));
+    g.appendChild(el('text',{x:CW/2,y:CH/2+5.5,'font-size':isJ?20:14.5,'text-anchor':'middle',fill:'#16324F','font-weight':800},c.label));
+    const d=degree(c.id);
+    if(d>0){ g.appendChild(el('circle',{cx:CW-2,cy:2,r:10,fill:isJ?'#F5B300':'#16324F'})); g.appendChild(el('text',{x:CW-2,y:6,'font-size':11,'text-anchor':'middle',fill:isJ?'#0D1B29':'#fff','font-weight':800},d)); }
+    if(c.tag){ const lbl={2:'②',3:'③'}[c.tag]; g.appendChild(el('text',{x:6,y:14,'font-size':12,fill:TAGC[c.tag],'font-weight':800},lbl)); }
+    gc.appendChild(g);
+  });
+  const bandY=MAPH-BAND;
+  const gb=el('g');
+  gb.appendChild(el('rect',{x:0,y:bandY,width:W,height:BAND,fill:'#16324F'}));
+  gb.appendChild(el('text',{x:22,y:bandY+22,'font-size':11,fill:'#A7C3D9','font-weight':700,'letter-spacing':'.14em'},'이 단원의 탐구 진술문'));
+  gb.appendChild(el('text',{x:22,y:bandY+48,'font-size':17.5,fill:'#fff','font-weight':800},'물체의 운동과 에너지 사이의 정량적인 관계는 일정한 법칙을 따르며, 이를 수치화하여'));
+  gb.appendChild(el('text',{x:22,y:bandY+68,'font-size':17.5,fill:'#fff','font-weight':800},'증명하는 것은 자연계의 보편적 원리를 규명한다.'));
+  svg.appendChild(gb);
+  panels(); save();
+}
+
+function panels(){
+  const nP=S.cards.filter(placed).length, nL=S.lines.length, nJ=degree(S.cards.find(c=>c.label==='J').id);
+  set('c-cards',`${nP} / 16`,nP===16); set('c-lines',`${nL} / 12`,nL>=12); set('c-j',nJ,nJ>=3);
+  const ok1=nP===16&&nL>=12;
+  $('p1').classList.toggle('done',ok1); $('p2').classList.toggle('locked',!ok1);
+  const t1=S.lines.filter(l=>l.tag===1).length, t2=S.cards.filter(c=>c.tag===2).length, t3=S.cards.filter(c=>c.tag===3).length;
+  set('c-tags',`${t1} / ${t2} / ${t3}`,t1>0&&t2>0&&t3>0);
+  const ok2=ok1&&t1>0&&t2>0&&t3>0&&S.reason.trim().length>3;
+  $('p2').classList.toggle('done',!!ok2); $('p3').classList.toggle('locked',!ok2);
+  $('save').disabled=!(ok2&&S.gname.trim());
+  document.querySelectorAll('.mode').forEach(b=>b.classList.toggle('on',+b.dataset.m===mode));
+}
+function set(id,txt,ok){const e=$(id);e.textContent=txt;e.className=ok?'ok':'no';}
+
+/* ── pointer ── */
+function pt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+svg.addEventListener('pointerdown',e=>{
+  const g=e.target.closest('.card'); if(!g) return;
+  const id=g.dataset.id, c=byId(id), p=pt(e);
+  drag={id,dx:p.x-c.x,dy:p.y-c.y,sx:e.clientX,sy:e.clientY,moved:false,snap:JSON.stringify(S)};
+  svg.setPointerCapture(e.pointerId);
+});
+svg.addEventListener('pointermove',e=>{
+  if(!drag) return;
+  if(!drag.moved && Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)<4) return;
+  if(!drag.moved){drag.moved=true;hist.push(drag.snap);}
+  const c=byId(drag.id), p=pt(e);
+  c.x=Math.max(0,Math.min(W-CW,p.x-drag.dx));
+  let ny=Math.max(0,Math.min(H-CH,p.y-drag.dy));
+  if(ny+CH>MAPH-BAND-6 && ny<MAPH) ny=(ny<MAPH-BAND-6-CH/2)?MAPH-BAND-6-CH:MAPH+8;
+  c.y=ny;
+  render();
+});
+svg.addEventListener('pointerup',e=>{
+  if(!drag) return;
+  const id=drag.id, moved=drag.moved; drag=null;
+  if(moved) return;
+  onCardClick(id);
+});
+svg.addEventListener('click',e=>{
+  const lab=e.target.closest('.ln'); if(!lab) return;
+  if(e.target.closest('.card')) return;
+  onLineClick(+lab.dataset.i, e);
+});
+
+function onCardClick(id){
+  const c=byId(id);
+  if(mode===2||mode===3){ push(); c.tag=(c.tag===mode)?0:mode; render(); return; }
+  if(mode===1){ hint('이 모드에서는 선을 클릭한다. 카드를 연결하려면 모드를 끄자.'); return; }
+  if(!placed(c)){ hint('카드를 먼저 지도 위로 올려야 연결할 수 있다.'); return; }
+  if(sel===null){ sel=id; render(); hint(`「${c.label}」 선택됨. 연결할 카드를 클릭.`); return; }
+  if(sel===id){ sel=null; render(); return; }
+  const a=sel,b=id; sel=null; render();
+  if(S.lines.some(l=>(l.a===a&&l.b===b)||(l.a===b&&l.b===a))){ hint('이미 연결된 두 카드. 선 위의 말풍선을 클릭해 고치자.'); return; }
+  openRel(a,b,null);
+}
+function onLineClick(i,e){
+  if(mode===1){ push(); S.lines[i].tag=S.lines[i].tag===1?0:1; render(); return; }
+  if(mode) return;
+  const l=S.lines[i]; openRel(l.a,l.b,i);
+}
+
+/* ── relation popover ── */
+const pop=$('pop');
+function openRel(a,b,idx){
+  const A=byId(a),B=byId(b);
+  let h=`<div class="t">${idx===null?'관계 단어를 고르면 선이 그어진다':'관계 단어 고치기'}</div><div class="pair"><b>${A.label}</b> — <b>${B.label}</b></div><div class="rels">`;
+  RELS.forEach(r=>h+=`<button class="rel" data-r="${r}">${r}</button>`);
+  h+=`</div><div class="row" id="custom" style="display:none"><input type="text" id="cin" placeholder="관계를 직접 입력 (예: 기울기)" maxlength="12"><button class="sm pri" id="cok">확인</button></div><div class="row">`;
+  if(idx!==null) h+=`<button class="sm del" id="ldel">선 지우기</button>`;
+  h+=`<button class="sm gho" id="lcancel">닫기</button></div>`;
+  pop.innerHTML=h;
+  const r=$('board').getBoundingClientRect();
+  const q=center(A),w=center(B); const ctm=svg.getScreenCTM();
+  const px=(q.x+w.x)/2*ctm.a+ctm.e-r.left, py=(q.y+w.y)/2*ctm.d+ctm.f-r.top;
+  pop.style.left=Math.max(8,Math.min(r.width-310,px-150))+'px'; pop.style.top=Math.max(8,Math.min(r.height-260,py+20))+'px';
+  pop.classList.add('on');
+  pop.querySelectorAll('.rel').forEach(btn=>btn.addEventListener('click',()=>{
+    const rr=btn.dataset.r;
+    if(rr==='직접 입력'){ $('custom').style.display='flex'; $('cin').focus(); return; }
+    commit(rr);
+  }));
+  const commit=rel=>{ push(); if(idx===null) S.lines.push({a,b,rel,tag:0}); else S.lines[idx].rel=rel; pop.classList.remove('on'); render(); };
+  $('cok').addEventListener('click',()=>{const v=$('cin').value.trim(); if(v) commit(v);});
+  $('cin')&&$('cin').addEventListener('keydown',e=>{if(e.key==='Enter'){const v=$('cin').value.trim(); if(v) commit(v);}});
+  $('lcancel').addEventListener('click',()=>pop.classList.remove('on'));
+  if(idx!==null) $('ldel').addEventListener('click',()=>{ push(); S.lines.splice(idx,1); pop.classList.remove('on'); render(); });
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){pop.classList.remove('on'); sel=null; mode=0; render();} });
+
+/* ── modes & panel ── */
+document.querySelectorAll('.mode').forEach(b=>b.addEventListener('click',()=>{ mode=(mode===+b.dataset.m)?0:+b.dataset.m; sel=null; render();
+  const msg={1:'선을 클릭해 ① 정량적 관계(파랑)로 표시',2:'카드를 클릭해 ② 일정한 법칙(초록)으로 표시',3:'카드를 클릭해 ③ 수치화·보편 원리(주황)로 표시'}[mode];
+  if(msg) hint(msg); }));
+$('reason').addEventListener('input',e=>{S.reason=e.target.value; panels(); save();});
+$('gname').addEventListener('input',e=>{S.gname=e.target.value; panels(); save();});
+$('undo').addEventListener('click',undo);
+$('reset').addEventListener('click',()=>ask('지도를 전부 지우고 처음부터 다시 할까요?',()=>{S=fresh();hist=[];sel=null;mode=0;render();$('reason').value='';$('gname').value='';}));
+if(!S.stars)S.stars=[];
+
+let ht; function hint(t){const h=$('hint');h.textContent=t;h.classList.remove('off');clearTimeout(ht);ht=setTimeout(()=>h.classList.add('off'),3500);}
+function ask(t,fn){$('mtx').textContent=t;$('modal').classList.add('on');$('myes').onclick=()=>{$('modal').classList.remove('on');fn();};$('mno').onclick=()=>$('modal').classList.remove('on');}
+
+/* ── timer ── */
+let tleft=300,tint=null;
+function tshow(){const m=Math.floor(tleft/60),s=tleft%60;$('timer').textContent=`⏱ ${m}:${s<10?'0':''}${s}`;}
+$('tstart').addEventListener('click',()=>{
+  if(tint){clearInterval(tint);tint=null;$('tstart').textContent='교대 타이머 시작';$('timer').classList.remove('alert');tleft=300;tshow();return;}
+  tleft=300;tshow();$('tstart').textContent='타이머 정지';$('timer').classList.remove('alert');
+  tint=setInterval(()=>{tleft--;tshow();if(tleft<=0){$('timer').textContent='🔁 조작자 교대!';$('timer').classList.add('alert');tleft=300;setTimeout(()=>{$('timer').classList.remove('alert');},4000);}},1000);
+});
+
+/* ── export ── */
+$('save').addEventListener('click',()=>{
+  const clone=svg.cloneNode(true);
+  clone.querySelector('.tray').remove();
+  clone.setAttribute('viewBox',`0 0 ${W} ${MAPH+150}`);
+  clone.setAttribute('width',W); clone.setAttribute('height',MAPH+150);
+  const f=document.createElementNS(NS,'g');
+  f.appendChild(el('rect',{x:0,y:MAPH,width:W,height:150,fill:'#F2F7FC'}));
+  f.appendChild(el('line',{x1:0,y1:MAPH,x2:W,y2:MAPH,stroke:'#C9D8E8','stroke-width':2}));
+  f.appendChild(el('text',{x:24,y:MAPH+32,'font-size':20,'font-weight':800,fill:'#16324F'},S.gname.trim()));
+  f.appendChild(el('text',{x:24,y:MAPH+60,'font-size':13,fill:'#6B7F94','font-weight':700},'우리 지도가 이 진술문을 보여 주는 곳'));
+  wrap(S.reason.trim(),64).forEach((ln,i)=>f.appendChild(el('text',{x:24,y:MAPH+84+i*22,'font-size':15,fill:'#243447'},ln)));
+  [['①','정량적 관계 = 파란 선','#3B8FEF'],['②','일정한 법칙 = 초록 카드','#25C2A0'],['③','수치화·보편 원리 = 주황 카드','#FF9147']].forEach((r,i)=>{
+    f.appendChild(el('rect',{x:800,y:MAPH+18+i*30,width:14,height:14,rx:4,fill:r[2]}));
+    f.appendChild(el('text',{x:822,y:MAPH+30+i*30,'font-size':13,fill:'#243447','font-weight':600},r[0]+' '+r[1]));
+  });
+  f.appendChild(el('text',{x:W-24,y:MAPH+138,'font-size':11,fill:'#9FB2C4','text-anchor':'end','letter-spacing':'.12em'},'세홍과학 · 제3구역 초고속 동력 제어실 · 9차시 단원 지도'));
+  clone.appendChild(f);
+  const xml=new XMLSerializer().serializeToString(clone);
+  const img=new Image();
+  img.onload=()=>{
+    const cv=document.createElement('canvas'); cv.width=W*2; cv.height=(MAPH+150)*2;
+    const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.drawImage(img,0,0,cv.width,cv.height);
+    const a=document.createElement('a'); a.download=`단원지도_${S.gname.trim().replace(/[\\/:*?"<>|\s]+/g,'_')}.png`; a.href=cv.toDataURL('image/png'); a.click();
+    hint('저장됐다. 다운로드된 그림을 패들렛에 올리자.');
+  };
+  img.onerror=()=>hint('저장에 실패했다. 다시 시도해 보자.');
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
+});
+function wrap(t,n){const out=[];let s=t;while(s.length>n){let k=s.lastIndexOf(' ',n);if(k<n*0.5)k=n;out.push(s.slice(0,k));s=s.slice(k).trim();}if(s)out.push(s);return out.slice(0,3);}
+
+if(S.soi) delete S.soi;
+$('reason').value=S.reason||''; $('gname').value=S.gname||'';
+render();
+})();
+</script>
+</body>
+</html>
