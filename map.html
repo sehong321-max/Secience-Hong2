@@ -51,6 +51,8 @@ aside{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto;}
 .soi{font-size:14px;line-height:1.75;color:var(--ink);}
 .soi span{padding:1px 3px;border-radius:4px;font-weight:700;}
 .soi .s1{background:#DCEBFC;color:#1D5FB0;} .soi .s3{background:#FFE6D3;color:#B85A10;}
+.plain{margin-top:7px;background:#FFF8E8;border-left:4px solid var(--gold,#F5B300);border-radius:0 9px 9px 0;padding:8px 11px;font-size:13px;line-height:1.6;color:#5A4A22;}
+.plain b{color:#7A5A16;font-weight:800;}
 .modes{display:flex;flex-direction:column;gap:5px;margin-top:8px;}
 .mode{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;font-size:13px;text-align:left;font-weight:700;color:var(--ink);display:flex;justify-content:space-between;align-items:center;}
 .mode small{font-weight:500;color:var(--muted);}
@@ -98,6 +100,7 @@ textarea:focus,input:focus{outline:2px solid var(--blue);border-color:var(--blue
     <button class="hbtn" id="tstart">교대 타이머 시작</button>
     <button class="hbtn" id="undo">↶ 되돌리기</button>
     <button class="hbtn warn" id="reset">전체 초기화</button>
+    <button class="hbtn" id="key" title="교사용">🔑</button>
   </div>
 </header>
 <main>
@@ -115,17 +118,18 @@ textarea:focus,input:focus{outline:2px solid var(--blue);border-color:var(--blue
       <div class="rules">선에는 반드시 <b>관계 단어</b>가 붙는다. 선 위의 말풍선을 클릭하면 고치거나 지울 수 있다. 조작자는 5분마다 교대.</div>
     </div>
     <div class="panel locked" id="p2">
-      <h3><span class="n">2</span>탐구 진술문 대응</h3>
+      <h3><span class="n">2</span>본부의 문장 확인하기</h3>
       <div class="lockmsg">🔒 카드 16장을 모두 잇고 관계 선 12개를 만들면 열린다.</div>
       <div class="soi"><span class="s1">물체의 운동과 에너지 사이의 정량적인 관계는 일정한 법칙을 따르며,</span> <span class="s3">이를 수치화하여 증명하는 것은 자연계의 보편적 원리를 규명한다.</span></div>
+      <div class="plain">쉽게 말하면 — <b>우리가 그은 선은 다 숫자로 정해져 있고, 그 관계들이 한 곳으로 모인다.</b></div>
       <div class="modes">
-        <button class="mode m1" data-m="1">① 정량적인 관계 · 일정한 법칙 <small>가장 확실한 선 3개를 클릭해 파랑</small></button>
-        <button class="mode m3" data-m="3">② 수치화 · 보편적 원리 <small>서로 다른 관계가 모이는 카드를 클릭해 주황</small></button>
+        <button class="mode m1" data-m="1">① 숫자로 정해진 관계 <small>가장 확실한 선 3개를 클릭 → 파랑</small></button>
+        <button class="mode m3" data-m="3">② 다 모이는 곳 <small>그 카드를 클릭 → 주황</small></button>
       </div>
       <div class="chk" style="margin-top:8px"><span>① 파란 선 / ② 주황 카드</span><span id="c-tags" class="no">0 / 0</span></div>
-      <div class="rules" style="margin-top:6px">지도가 이어지자 본부의 문장이 도착했다. 세 토막이 <b>지도의 어디에</b> 있는지 찾아 색으로 표시하자.</div>
-      <div class="rules" style="margin-top:6px;background:#F2F7FC;border-radius:8px;padding:7px 9px;color:#34495E">문장 틀 — 우리 지도에서 <b>○○</b>와(과) <b>○○</b>가 <b>○○</b>로 이어져 있다. 그래서 <b>○○</b>.</div>
-      <textarea id="reason" rows="2" placeholder="우리 지도에서 ○○와 ○○가 ○○로 이어져 있다. 그래서 ○○." style="margin-top:8px"></textarea>
+      <div class="rules" style="margin-top:6px">본부의 문장이 우리 지도 <b>어디에 있는지</b> 찾아 표시하자.</div>
+      <div class="rules" style="margin-top:6px;background:#F2F7FC;border-radius:8px;padding:7px 9px;color:#34495E">문장 틀 — 우리 지도에서 <b>○○</b>와(과) <b>○○</b>가 <b>○○</b>로 이어져 있다.<br>그래서 <b>○○</b>와(과) <b>○○</b>를 <b>같은 J로 비교</b>할 수 있다.</div>
+      <textarea id="reason" rows="2" placeholder="우리 지도에서 ○○와 ○○가 ○○로 이어져 있다. 그래서 ○○와 ○○를 같은 J로 비교할 수 있다." style="margin-top:8px"></textarea>
     </div>
     <div class="panel locked" id="p3">
       <h3><span class="n">3</span>저장</h3>
@@ -343,8 +347,66 @@ $('undo').addEventListener('click',undo);
 $('reset').addEventListener('click',()=>ask('지도를 전부 지우고 처음부터 다시 할까요?',()=>{S=fresh();hist=[];sel=null;mode=0;render();$('reason').value='';$('gname').value='';}));
 if(!S.stars)S.stars=[];
 
+/* ── 교사용 모범 답안 ── */
+var MODEL={
+ pos:{'속력':[20,20],'자유 낙하':[230,20],'9.8':[440,20],'위치 E':[650,20],'일':[860,20],
+   '등속 운동':[20,125],'운동 E':[230,125],'역학적 E':[650,125],'보존':[860,125],'마찰':[1060,125],
+   'J':[430,270],'열':[1060,235],'전기 E':[700,370],'발전':[900,370],'소비 전력 (W)':[700,466],'전력량 (Wh)':[900,466]},
+ lines:[['속력','등속 운동','일정'],['속력','자유 낙하','증가'],['자유 낙하','9.8','기울기'],
+   ['9.8','위치 E','비례'],['위치 E','일','같다'],['속력','운동 E','제곱 비례'],
+   ['운동 E','역학적 E','합'],['위치 E','역학적 E','합'],['위치 E','운동 E','전환'],
+   ['역학적 E','보존','조건'],['보존','마찰','깨뜨림'],['마찰','열','전환'],
+   ['운동 E','발전','전환'],['발전','전기 E','전환'],
+   ['전기 E','소비 전력 (W)','1초당'],['소비 전력 (W)','전력량 (Wh)','W × 시간'],
+   ['열','J','단위'],['전기 E','J','단위'],['위치 E','J','단위'],['운동 E','J','단위'],
+   ['소비 전력 (W)','J','1 W = 1 J/s']],
+ blue:[['속력','운동 E'],['9.8','위치 E'],['역학적 E','보존']],
+ reason:'우리 지도에서 위치 E와 전기 E가 단위로 이어져 있다. 그래서 물이 떨어지는 것과 난로가 켜지는 것을 같은 J로 비교할 수 있다.'
+};
+function loadModel(){
+  push();
+  var id={}; S.cards.forEach(function(c){ id[c.label]=c.id;
+    var p=MODEL.pos[c.label]; c.x=p[0]; c.y=p[1]; c.tag=(c.label==='J')?3:0; });
+  S.lines=MODEL.lines.map(function(l){
+    var blue=MODEL.blue.some(function(b){return (b[0]===l[0]&&b[1]===l[1])||(b[0]===l[1]&&b[1]===l[0]);});
+    return {a:id[l[0]],b:id[l[1]],rel:l[2],tag:blue?1:0};
+  });
+  S.reason=MODEL.reason; S.gname=S.gname||'모범 답안 예시';
+  $('reason').value=S.reason; $('gname').value=S.gname;
+  bandShown=false; sel=null; mode=0; render();
+  hint('모범 답안을 불러왔다. 되돌리기(↶)로 원래 지도로 돌아갈 수 있다.');
+}
+$('key').addEventListener('click',function(){
+  askInput('교사용 코드를 입력하세요', function(v){
+    if(v==='6901') loadModel();
+    else ask('코드가 맞지 않습니다.', null, '닫기', null);
+  });
+});
+function askInput(text, onOk){
+  $('mtx').innerHTML=text+'<div style="margin-top:12px"><input type="password" id="mcode" '+
+    'style="width:100%;text-align:center;font-size:18px;letter-spacing:.3em;padding:10px;'+
+    'border:1.5px solid var(--line);border-radius:9px" maxlength="8" autocomplete="off"></div>';
+  $('myes').textContent='확인'; $('mno').style.display=''; $('mno').textContent='취소';
+  _yes=function(){ };
+  $('modal').classList.add('on');
+  var inp=$('mcode');
+  setTimeout(function(){ try{ inp.focus(); }catch(e){} },40);
+  var go=function(){ var v=inp.value.trim(); closeModal(); onOk(v); };
+  $('myes').onclick=go;
+  inp.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); go(); } });
+}
+
 let ht; function hint(t){const h=$('hint');h.textContent=t;h.classList.remove('off');clearTimeout(ht);ht=setTimeout(()=>h.classList.add('off'),3500);}
-function ask(t,fn){$('mtx').textContent=t;$('modal').classList.add('on');$('myes').onclick=()=>{$('modal').classList.remove('on');fn();};$('mno').onclick=()=>$('modal').classList.remove('on');}
+function ask(t,fn,yes,no){
+  $('mtx').innerHTML=t;
+  $('myes').textContent=yes||'확인';
+  if(no===null){ $('mno').style.display='none'; } else { $('mno').style.display=''; $('mno').textContent=no||'취소'; }
+  $('modal').classList.add('on');
+  $('myes').onclick=function(){ $('modal').classList.remove('on'); if(fn) fn(); };
+  $('mno').onclick=function(){ $('modal').classList.remove('on'); };
+}
+function closeModal(){ $('modal').classList.remove('on'); }
+var _yes=null;
 
 /* ── timer ── */
 let tleft=300,tint=null;
@@ -365,9 +427,9 @@ $('save').addEventListener('click',()=>{
   f.appendChild(el('rect',{x:0,y:MAPH,width:W,height:150,fill:'#F2F7FC'}));
   f.appendChild(el('line',{x1:0,y1:MAPH,x2:W,y2:MAPH,stroke:'#C9D8E8','stroke-width':2}));
   f.appendChild(el('text',{x:24,y:MAPH+32,'font-size':20,'font-weight':800,fill:'#16324F'},S.gname.trim()));
-  f.appendChild(el('text',{x:24,y:MAPH+60,'font-size':13,fill:'#6B7F94','font-weight':700},'우리 지도가 이 진술문을 보여 주는 곳'));
+  f.appendChild(el('text',{x:24,y:MAPH+60,'font-size':13,fill:'#6B7F94','font-weight':700},'본부의 문장이 우리 지도에 있는 곳'));
   wrap(S.reason.trim(),64).forEach((ln,i)=>f.appendChild(el('text',{x:24,y:MAPH+84+i*22,'font-size':15,fill:'#243447'},ln)));
-  [['①','정량적인 관계 · 일정한 법칙 = 파란 선','#3B8FEF'],['②','수치화 · 보편적 원리 = 주황 카드','#FF9147']].forEach((r,i)=>{
+  [['①','숫자로 정해진 관계 = 파란 선','#3B8FEF'],['②','다 모이는 곳 = 주황 카드','#FF9147']].forEach((r,i)=>{
     f.appendChild(el('rect',{x:800,y:MAPH+18+i*30,width:14,height:14,rx:4,fill:r[2]}));
     f.appendChild(el('text',{x:822,y:MAPH+30+i*30,'font-size':13,fill:'#243447','font-weight':600},r[0]+' '+r[1]));
   });
