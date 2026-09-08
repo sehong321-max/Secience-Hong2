@@ -111,7 +111,7 @@ body.board{overflow:hidden;}
 /* ═══════════════════════════════════════════════════════
    ★ 여기에 구글 앱스 스크립트 웹앱 URL을 붙여넣으세요 ★
    ═══════════════════════════════════════════════════════ */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxWHWuYvH2x79RdNJY0VJoLcIxDG5EZtDb01MIBVyoVGoddbxBliyK0CF8uJnyePYj/exec";
+const SCRIPT_URL = "";
 
 const LP=[
  ['사고하는 사람','잃어버린 에너지를 끝까지 따라갔다'],
@@ -196,7 +196,7 @@ function boardView(){
     <div class="b-view"><div class="b-roll" id="roll"></div><div class="wait" id="wait"><div class="b px"></div><div class="t">기록 수신 대기 중...</div></div></div>
     <div class="b-bot"><div class="t" id="bycls"></div><div class="t" style="margin-left:auto">세상에서 가장 홍미로운 과학</div></div>
   </div>
-  <div class="b-ctl"><button class="px" id="slow">느리게</button><button class="px" id="fast">빠르게</button><button class="px" id="pause">일시정지</button></div>`;
+  <div class="b-ctl"><button class="px" id="bgm">🔈 BGM 켜기</button><button class="px" id="slow">느리게</button><button class="px" id="fast">빠르게</button><button class="px" id="pause">일시정지</button></div>`;
   let data=[], y=0, speed=0.28, paused=false, seen=new Set();
   const roll=$('#roll'), view=roll.parentElement;
 
@@ -236,6 +236,58 @@ function boardView(){
   $('#slow').onclick=()=>speed=Math.max(.08,speed-.1);
   $('#fast').onclick=()=>speed=Math.min(1.2,speed+.1);
   $('#pause').onclick=e=>{paused=!paused;e.target.textContent=paused?'다시 시작':'일시정지';};
+  /* ── 8비트 BGM (외부 파일 없음 · Web Audio 합성) ── */
+  var AC=window.AudioContext||window.webkitAudioContext, actx=null, master=null, seqT=null, step=0, playing=false;
+  var LEAD=[  /* 음이름 → 반음, null=쉼표 */
+    76,null,79,null,81,79,76,null, 74,null,76,null,72,null,69,null,
+    71,null,74,null,76,74,71,null, 69,null,71,null,67,null,64,null,
+    76,null,79,null,84,null,83,81, 79,null,76,null,79,81,79,76,
+    74,76,79,null,81,79,76,74, 72,null,74,null,76,null,null,null];
+  var BASS=[45,null,52,null,45,null,52,null, 43,null,50,null,43,null,50,null,
+            40,null,47,null,40,null,47,null, 41,null,48,null,43,null,50,null,
+            45,null,52,null,45,null,52,null, 43,null,50,null,43,null,50,null,
+            40,null,47,null,41,null,48,null, 43,null,50,null,43,50,43,null];
+  function hz(n){ return 440*Math.pow(2,(n-69)/12); }
+  function blip(note,type,dur,vol,detune){
+    if(note===null) return;
+    var t=actx.currentTime, o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.setValueAtTime(hz(note),t);
+    if(detune) o.detune.setValueAtTime(detune,t);
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(vol,t+0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t+dur+0.02);
+  }
+  function hat(){
+    var t=actx.currentTime, len=0.045, sr=actx.sampleRate;
+    var buf=actx.createBuffer(1,Math.floor(sr*len),sr), d=buf.getChannelData(0);
+    for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length);
+    var src=actx.createBufferSource(); src.buffer=buf;
+    var g=actx.createGain(); g.gain.setValueAtTime(0.05,t);
+    var hp=actx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=6000;
+    src.connect(hp); hp.connect(g); g.connect(master); src.start(t);
+  }
+  function nextStep(){
+    var i=step%64;
+    blip(LEAD[i],'square',0.16,0.075,0);
+    blip(BASS[i],'triangle',0.22,0.10,0);
+    if(i%4===2) hat();
+    step++;
+  }
+  function bgmOn(){
+    if(!actx){ actx=new AC(); master=actx.createGain(); master.gain.value=0.5; master.connect(actx.destination); }
+    if(actx.state==='suspended') actx.resume();
+    playing=true; step=0;
+    seqT=setInterval(nextStep,150);   /* 약 100 BPM · 8분음표 */
+    $('#bgm').textContent='🔊 BGM 끄기';
+  }
+  function bgmOff(){
+    playing=false; clearInterval(seqT); seqT=null;
+    $('#bgm').textContent='🔈 BGM 켜기';
+  }
+  $('#bgm').addEventListener('click',function(){ playing?bgmOff():bgmOn(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='m'||e.key==='M'){ playing?bgmOff():bgmOn(); } });
+
   draw(); pull(); setInterval(pull,5000); tick();
 }
 
