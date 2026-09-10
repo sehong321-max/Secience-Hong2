@@ -8,7 +8,7 @@
 :root{
   --navy:#0B1220; --deep:#050A12; --ink:#DEE9F3; --muted:#8DA5BC; --line:#22344F; --paper:#12203A;
   --blue:#3B8FEF; --mint:#25C2A0; --orange:#FF9147; --coral:#FF6B6B; --grape:#A06BEA; --gold:#F5B300;
-  --c1:#3B8FEF; --c3:#FF9147;
+  --c1:#3DE0FF; --c3:#FFB020;
   --sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;
 }
 *{box-sizing:border-box;}
@@ -58,14 +58,14 @@ aside{display:flex;flex-direction:column;gap:10px;min-height:0;overflow:auto;}
 .rules{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:6px;}
 .soi{font-size:14px;line-height:1.75;color:#C4D8EA;}
 .soi span{padding:1px 3px;border-radius:4px;font-weight:700;}
-.soi .s1{background:rgba(59,143,239,.25);color:#BEDDFF;} .soi .s3{background:rgba(255,145,71,.25);color:#FFD0AC;}
+.soi .s1{background:rgba(61,224,255,.22);color:#BFF4FF;} .soi .s3{background:rgba(255,176,32,.24);color:#FFDFA8;}
 .plain{margin-top:7px;background:rgba(252,196,25,.10);border-left:4px solid #FCC419;border-radius:0 9px 9px 0;padding:8px 11px;font-size:13px;line-height:1.6;color:#F0DFBC;}
 .plain b{color:#FFD98A;font-weight:800;}
 .modes{display:flex;flex-direction:column;gap:5px;margin-top:8px;}
 .mode{border:1.5px solid var(--line);background:rgba(255,255,255,.07);border-radius:10px;padding:7px 10px;font-size:13px;text-align:left;font-weight:700;color:var(--ink);display:flex;justify-content:space-between;align-items:center;}
 .mode small{font-weight:500;color:var(--muted);}
-.mode.on{border-width:2px;} .mode.m1.on{border-color:var(--c1);background:rgba(59,143,239,.22);} 
-.mode.m3.on{border-color:var(--c3);background:rgba(255,145,71,.20);} 
+.mode.on{border-width:2px;} .mode.m1.on{border-color:var(--c1);background:rgba(61,224,255,.18);color:#BFF4FF;} 
+.mode.m3.on{border-color:var(--c3);background:rgba(255,176,32,.18);color:#FFDFA8;} 
 textarea,input[type=text]{width:100%;background:rgba(0,0,0,.28);border:1.5px solid var(--line);border-radius:9px;padding:8px 10px;font-family:inherit;font-size:13.5px;color:var(--ink);resize:vertical;}
 textarea:focus,input:focus{outline:2px solid var(--blue);border-color:var(--blue);}
 .btn{border:none;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:800;width:100%;margin-top:8px;}
@@ -131,10 +131,10 @@ textarea:focus,input:focus{outline:2px solid var(--blue);border-color:var(--blue
       <div class="soi"><span class="s1">물체의 운동과 에너지 전환 사이의 정량적인 관계는 일정한 법칙을 따르며,</span> <span class="s3">이를 수치화하여 모형으로 나타내는 것은</span> 자연 현상을 <b style="color:#0F7A5A">예측</b>하고 기술을 설계하는 바탕이 된다.</div>
       <div class="plain">쉽게 말하면 — <b>우리가 그은 선은 다 숫자로 정해져 있다. 그래서 하나를 재면 나머지를 계산으로 알 수 있다.</b></div>
       <div class="modes">
-        <button class="mode m1" data-m="1">① 숫자로 정해진 관계 <small>가장 확실한 항로 3개를 클릭 → 파랑</small></button>
-        <button class="mode m3" data-m="3">② 모형이 되는 곳 <small>항로가 모이는 관측점을 클릭 → 주황</small></button>
+        <button class="mode m1" data-m="1">① 숫자로 정해진 관계 <small>가장 확실한 항로 3개를 클릭 → 청록</small></button>
+        <button class="mode m3" data-m="3">② 모형이 되는 곳 <small>항로가 모이는 관측점을 클릭 → 노랑</small></button>
       </div>
-      <div class="chk" style="margin-top:8px"><span>① 파란 항로 / ② 주황 관측점</span><span id="c-tags" class="no">0 / 0</span></div>
+      <div class="chk" style="margin-top:8px"><span>① 청록 항로 / ② 노란 관측점</span><span id="c-tags" class="no">0 / 0</span></div>
       <div class="rules" style="margin-top:6px">본부의 문장이 복원한 항로 <b>어디에 있는지</b> 찾아 표시하자.</div>
       <div class="rules" style="margin-top:6px;background:rgba(255,255,255,.06);border-radius:8px;padding:7px 9px;color:#C4D8EA">문장 틀 — 복원한 항로에서 <b>○○</b>와(과) <b>○○</b>가 <b>○○</b>로 이어져 있다.<br>그래서 <b>○○</b>를 재면 <b>○○</b>를 <b>계산으로 미리 알 수</b> 있다.</div>
       <textarea id="reason" rows="2" placeholder="복원한 항로에서 ○○와 ○○가 ○○로 이어져 있다. 그래서 ○○를 재면 ○○를 계산으로 미리 알 수 있다." style="margin-top:8px"></textarea>
@@ -160,7 +160,7 @@ const svg=$('svg'); const NS='http://www.w3.org/2000/svg';
 const W=1200,H=760,MAPH=600, CW=118,CH=48, BAND=126;
 const CARD_LABELS=['속력','등속 운동','자유 낙하','9.8','일','위치 E','운동 E','역학적 E','보존','마찰','열','발전','전기 E','소비 전력 (W)','전력량 (Wh)','J'];
 const RELS=['비례','제곱 비례','반비례','합','차','같다','전환','증가','감소','일정','기울기','조건','깨뜨림','단위','1 W = 1 J/s','직접 입력'];
-const TAGC={1:'#3B8FEF',3:'#FF9147'};
+const TAGC={1:'#3DE0FF',3:'#FFB020'};
 
 
 /* ── state ── */
@@ -204,11 +204,15 @@ function render(){
     const p=center(A),q=center(B);
     const col=l.tag===1?TAGC[1]:'#7FC4F0';
     const g=el('g',{class:'ln','data-i':i});
-    g.appendChild(el('line',{x1:p.x,y1:p.y,x2:q.x,y2:q.y,stroke:col,'stroke-width':l.tag===1?3.5:2.2,'stroke-linecap':'round'}));
+    if(l.tag===1){
+      g.appendChild(el('line',{x1:p.x,y1:p.y,x2:q.x,y2:q.y,stroke:'#3DE0FF','stroke-width':13,'stroke-linecap':'round',opacity:.22}));
+      g.appendChild(el('line',{x1:p.x,y1:p.y,x2:q.x,y2:q.y,stroke:'#3DE0FF','stroke-width':6,'stroke-linecap':'round',opacity:.5}));
+    }
+    g.appendChild(el('line',{x1:p.x,y1:p.y,x2:q.x,y2:q.y,stroke:col,'stroke-width':l.tag===1?3.2:2.2,'stroke-linecap':'round'}));
     const mx=(p.x+q.x)/2,my=(p.y+q.y)/2, tw=Math.max(44,[...l.rel].reduce((w,ch)=>w+(/[가-힣]/.test(ch)?13:7.5),0)+22);
     const lab=el('g',{class:'lab',style:'cursor:pointer'});
-    lab.appendChild(el('rect',{x:mx-tw/2,y:my-12,width:tw,height:24,rx:12,fill:l.tag===1?'#123A5E':'#0E2036',stroke:col,'stroke-width':1.5}));
-    lab.appendChild(el('text',{x:mx,y:my+4.5,'font-size':12.5,'text-anchor':'middle',fill:'#DEE9F3','font-weight':700},l.rel));
+    lab.appendChild(el('rect',{x:mx-tw/2,y:my-12,width:tw,height:24,rx:12,fill:l.tag===1?'#0A3B4C':'#0E2036',stroke:col,'stroke-width':l.tag===1?2.2:1.5}));
+    lab.appendChild(el('text',{x:mx,y:my+4.5,'font-size':12.5,'text-anchor':'middle',fill:l.tag===1?'#BFF4FF':'#DEE9F3','font-weight':l.tag===1?800:700},l.rel));
     g.appendChild(lab); gl.appendChild(g);
   });
   // cards
@@ -216,12 +220,17 @@ function render(){
   S.cards.forEach(c=>{
     const isJ=c.label==='J', on=sel===c.id;
     const g=el('g',{class:'card','data-id':c.id,transform:`translate(${c.x},${c.y})`,style:'cursor:grab'});
+    if(c.tag===3){
+      g.appendChild(el('rect',{x:-7,y:-7,width:CW+14,height:CH+14,rx:16,fill:'none',stroke:'#FFB020','stroke-width':3,opacity:.30}));
+      g.appendChild(el('rect',{x:-3,y:-3,width:CW+6,height:CH+6,rx:13,fill:'none',stroke:'#FFB020','stroke-width':3,opacity:.55}));
+    }
     const stroke=on?'#FF9147':(c.tag?TAGC[c.tag]:(isJ?'#FCC419':'#3C6288'));
-    g.appendChild(el('rect',{x:0,y:0,width:CW,height:CH,rx:10,fill:c.tag===3?'#3A2408':(isJ?'#2E2404':'#132639'),stroke,'stroke-width':on||c.tag?3:1.8}));
+    g.appendChild(el('rect',{x:0,y:0,width:CW,height:CH,rx:10,fill:c.tag===3?'#4A2E05':(isJ?'#2E2404':'#132639'),stroke,'stroke-width':on||c.tag?3:1.8}));
     g.appendChild(el('text',{x:CW/2,y:CH/2+5.5,'font-size':isJ?20:14.5,'text-anchor':'middle',fill:isJ?'#FFD98A':'#EAF2F9','font-weight':800},c.label));
     const d=degree(c.id);
     if(d>0){ g.appendChild(el('circle',{cx:CW-2,cy:2,r:10,fill:isJ?'#FCC419':'#3B8FEF'})); g.appendChild(el('text',{x:CW-2,y:6,'font-size':11,'text-anchor':'middle',fill:isJ?'#2A1D00':'#08243A','font-weight':800},d)); }
-    if(c.tag===3){ g.appendChild(el('text',{x:6,y:14,'font-size':12,fill:TAGC[3],'font-weight':800},'②')); }
+    if(c.tag===3){ g.appendChild(el('circle',{cx:12,cy:11,r:9,fill:'#FFB020'}));
+      g.appendChild(el('text',{x:12,y:15,'font-size':11.5,fill:'#2A1D00','text-anchor':'middle','font-weight':800},'②')); }
     gc.appendChild(g);
   });
   const nP0=S.cards.filter(placed).length, nL0=S.lines.length;
@@ -445,7 +454,7 @@ $('save').addEventListener('click',()=>{
   f.appendChild(el('rect',{x:0,y:MAPH,width:W,height:92,fill:'#F2F7FC'}));
   f.appendChild(el('line',{x1:0,y1:MAPH,x2:W,y2:MAPH,stroke:'#C9D8E8','stroke-width':2}));
   f.appendChild(el('text',{x:24,y:MAPH+38,'font-size':21,'font-weight':800,fill:'#16324F'},S.gname.trim()));
-  [['①','숫자로 정해진 관계 = 파란 항로','#3B8FEF'],['②','모형이 되는 곳 = 주황 관측점','#FF9147']].forEach((r,i)=>{
+  [['①','숫자로 정해진 관계 = 청록 항로','#3DE0FF'],['②','모형이 되는 곳 = 노란 관측점','#FFB020']].forEach((r,i)=>{
     f.appendChild(el('rect',{x:760,y:MAPH+22+i*30,width:14,height:14,rx:4,fill:r[2]}));
     f.appendChild(el('text',{x:782,y:MAPH+34+i*30,'font-size':14,fill:'#243447','font-weight':600},r[0]+' '+r[1]));
   });
