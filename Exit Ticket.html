@@ -147,7 +147,9 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s||'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 /* 시트가 '3-6' 을 날짜로 바꿔 보낸 경우 되돌리기 */
 const fixCls=v=>{ const t=String(v||'').trim();
-  if(/^\d{4}-\d{2}-\d{2}T/.test(t)){ const d=new Date(t); if(!isNaN(d)) return (d.getMonth()+1)+'-'+d.getDate(); }
+  if(t.length<=6) return t;                          /* '3-7' 같은 정상 값은 그대로 */
+  const d=new Date(t);                                /* ISO 형식, 'Sat Mar 07 2026 …' 형식 모두 */
+  if(!isNaN(d) && d.getFullYear()>1950) return (d.getMonth()+1)+'-'+d.getDate();
   return t; };
 
 /* ══════════ 학생 화면 ══════════ */
