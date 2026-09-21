@@ -167,7 +167,7 @@ function studentView(){
     </div>
     <div class="card px">
       <div class="q">1 · 우리 지도로 진술문 말하기</div>
-      <div class="frame">문장 틀 — 우리 지도에서 <b>○○</b>와(과) <b>○○</b>가 <b>○○</b>로 이어져 있다. 그래서 <b>○○</b>.</div>
+      <div class="frame">문장 틀 — 우리 지도에서 <b>○○</b>와(과) <b>○○</b>가 <b>○○</b>로 이어져 있다. 그래서 <b>○○</b>를 재면 <b>○○</b>를 계산으로 미리 알 수 있다.</div>
       <textarea id="line" rows="3" maxlength="160" placeholder="우리 지도에서 ..."></textarea>
     </div>
     <div class="card px">
@@ -188,9 +188,33 @@ function studentView(){
     const d={cls:$('#cls').value.trim(),grp:$('#grp').value.trim(),lp,line:$('#line').value.trim(),ev:$('#ev').value.trim()};
     $('#go').disabled=true; $('#msg').textContent='통신 위성으로 전송 중...';
     if(!SCRIPT_URL){ setTimeout(()=>done(d),600); return; }
-    fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(d)})
-      .then(r=>r.text()).then(()=>done(d))
-      .catch(()=>{ $('#msg').textContent='⚠ 전송 실패. 다시 눌러 보자.'; $('#go').disabled=false; });
+    /* 앱스크립트는 POST 뒤 다른 주소로 넘기며 답장을 막으므로, 답장은 읽지 않고 보내기만 한다 */
+    var finished=false;
+    var guard=setTimeout(function(){ if(!finished){ finished=true;
+      $('#msg').textContent='⚠ 통신이 느리다. 잠시 뒤 다시 눌러 보자.'; $('#go').disabled=false; } },15000);
+    /* 1) 전송 — 응답은 읽지 않는다(크롬북 CORS 회피)  2) 목록을 다시 읽어 실제로 들어갔는지 확인 */
+    fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(d)})
+      .then(function(){ verify(d,0); })
+      .catch(function(){ verify(d,0); });
+    function verify(d,n){
+      $('#msg').textContent='본부 수신 확인 중...'+(n?' ('+(n+1)+'/4)':'');
+      setTimeout(function(){
+        fetch(SCRIPT_URL+'?list=1&t='+Date.now(),{cache:'no-store'})
+          .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+          .then(function(list){
+            var hit=Array.isArray(list)&&list.some(function(x){
+              return String(x.cls)===d.cls && String(x.grp)===d.grp && String(x.line)===d.line; });
+            if(hit) done(d);
+            else if(n<3) verify(d,n+1);
+            else fail('기록이 확인되지 않았다. 잠시 뒤 다시 눌러 보자.');
+          })
+          .catch(function(e){
+            if(n<3) verify(d,n+1);
+            else fail('본부와 연결되지 않는다. 캡틴에게 알리자. ('+(e&&e.message||'연결 오류')+')');
+          });
+      }, n?1600:1200);
+    }
+    function fail(t){ $('#msg').textContent='⚠ '+t; $('#go').disabled=false; }
   });
   function done(d){
     document.getElementById('app').innerHTML=`<div class="wrap"><div class="done">
