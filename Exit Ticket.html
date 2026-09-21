@@ -145,6 +145,10 @@ const q=new URLSearchParams(location.search);
 const isBoard=q.get('mode')==='board';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s||'').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+/* 시트가 '3-6' 을 날짜로 바꿔 보낸 경우 되돌리기 */
+const fixCls=v=>{ const t=String(v||'').trim();
+  if(/^\d{4}-\d{2}-\d{2}T/.test(t)){ const d=new Date(t); if(!isNaN(d)) return (d.getMonth()+1)+'-'+d.getDate(); }
+  return t; };
 
 /* ══════════ 학생 화면 ══════════ */
 function studentView(){
@@ -301,6 +305,7 @@ function boardView(){
     if(!SCRIPT_URL){ if(!data.length){ data=DEMO.slice(); draw(); } return; }
     fetch(SCRIPT_URL+'?list=1',{cache:'no-store'}).then(r=>r.json()).then(list=>{
       if(!Array.isArray(list)) return;
+      list=list.map(x=>Object.assign({},x,{cls:fixCls(x.cls)}));
       if(list.length!==data.length){ data=list; draw(); }
     }).catch(()=>{});
   }
